@@ -8,70 +8,56 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: 'expense-db.csjy8kesyd45.us-east-1.rds.amazonaws.com',
   user: 'admin',
-  password: 'YOUR_PASSWORD',
+  password: 'password', // 🔥 Replace with your actual password
   database: 'expense_db'
 });
 
+// Connect to DB
 db.connect((err) => {
   if (err) {
-    console.log('DB connection failed:', err);
+    console.error('❌ DB connection failed:', err);
   } else {
-    console.log('Connected to RDS MySQL ✅');
+    console.log('✅ Connected to RDS MySQL');
   }
 });
 
-// API to add expense
+// Root route (for browser check)
+app.get('/', (req, res) => {
+  res.send('🚀 Expense Tracker API is running');
+});
+
+// Add expense
 app.post('/add', (req, res) => {
   const { title, amount } = req.body;
 
+  if (!title || !amount) {
+    return res.status(400).send('Title and amount are required');
+  }
+
   const sql = 'INSERT INTO expenses (title, amount) VALUES (?, ?)';
+
   db.query(sql, [title, amount], (err, result) => {
-    if (err) return res.send(err);
-    res.send('Expense added');
+    if (err) {
+      console.error('❌ Insert error:', err);
+      return res.status(500).send('Database error');
+    }
+    res.send('✅ Expense added successfully');
   });
 });
 
-// API to get expenses
+// Get all expenses
 app.get('/expenses', (req, res) => {
   db.query('SELECT * FROM expenses', (err, results) => {
-    if (err) return res.send(err);
+    if (err) {
+      console.error('❌ Fetch error:', err);
+      return res.status(500).send('Database error');
+    }
     res.json(results);
   });
 });
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
-});
-// const express = require('express');
-// const app = express();
-// const cors = require('cors');
-
-// app.use(cors());
-// app.use(express.json());
-
-// app.get('/api/health', (req, res) => {
-//   res.send('API is working');
-// });
-
-// let expenses = [];
-
-// app.post('/api/expenses', (req, res) => {
-//   const { title, amount } = req.body;
-//   const newExpense = { id: Date.now(), title, amount };
-//   expenses.push(newExpense);
-//   res.json(newExpense);
-// });
-
-// app.get('/api/expenses', (req, res) => {
-//   res.json(expenses);
-// });
-
-// app.delete('/api/expenses/:id', (req, res) => {
-//   const id = parseInt(req.params.id);
-//   expenses = expenses.filter(exp => exp.id !== id);
-//   res.send('Deleted');
-// });
-
-// app.listen(3000, '0.0.0.0', () => {
-//   console.log('Server running on port 3000');
-// });
+// Start server
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+})
