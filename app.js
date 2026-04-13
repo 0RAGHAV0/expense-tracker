@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
 
@@ -6,10 +7,10 @@ app.use(express.json());
 
 // DB connection
 const db = mysql.createConnection({
-  host: 'expense-db.csjy8kesyd45.us-east-1.rds.amazonaws.com',
-  user: 'admin',
-  password: 'password', // 🔥 Replace with your actual password
-  database: 'expense_db'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 // Connect to DB
